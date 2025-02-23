@@ -12,13 +12,13 @@ public class baseState : State
     }
     public override void Enter()
     {
-        Debug.Log("State is: " + this.GetType());
+        //Debug.Log("State is: " + this.GetType());
     }
     //since most of the classes use this functions
     public override void Update()
     {
-        ctx.MovePlayer();
-        ctx.HandleGravity();
+        //Debug.Log("Current state is: " + this.GetType() + "Object name is: " + ctx.gameObject.name);
+        ctx.HandleGravityRpc();
     }
     public override void Exit()
     {

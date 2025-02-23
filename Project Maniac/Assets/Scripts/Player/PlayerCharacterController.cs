@@ -34,27 +34,64 @@ public class PlayerCharacterController : NetworkBehaviour
     private void Start()
     {
         MovementStateMachine.currentState = MovementStateMachine.IdleState;
+        currentSpeed = walkSpeed;
     }
-    
+
+    public override void OnNetworkSpawn()
+    {
+        gameObject.name = "player" + NetworkObjectId;
+        if (IsOwner)
+        {
+            GetComponentInChildren<MeshRenderer>().enabled = false;   
+        }
+    }
+
     void Update()
     {
-        GetInput();
+        if (!IsOwner) return;
+        
+        if (IsServer)
+        {
+            MovePlayer(GetInput());
+            
+        }else if (IsClient)
+        {
+            MovePlayerRpc(GetInput());
+        }
+        
         MovementStateMachine.Update();
         
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded())
         {
-            MovementStateMachine.ChangeSate(MovementStateMachine.JumpState);
+            if (IsOwner)
+            {
+                JumpPlayerRpc();
+            }
         }
         if (!isGrounded() && MovementStateMachine.currentState != MovementStateMachine.FallState)
         {
             MovementStateMachine.ChangeSate(MovementStateMachine.FallState);
         }
+        
     }
-    public void MovePlayer()
+    [Rpc(SendTo.Server)]
+    public void MovePlayerRpc(Vector3 movementVector)
     {
         characterController.Move((movementVector * currentSpeed + velocity)  * Time.deltaTime);
     }
-    public void HandleGravity()
+    void MovePlayer(Vector3 movementVector)
+    {
+        characterController.Move((movementVector * currentSpeed + velocity)  * Time.deltaTime);
+    }
+
+    [Rpc(SendTo.Server)]
+    void JumpPlayerRpc()
+    {
+        MovementStateMachine.ChangeSate(MovementStateMachine.JumpState);
+    }
+    
+    [Rpc(SendTo.Server)]
+    public void HandleGravityRpc()
     {
         if (isGrounded() && velocity.y < 0){
             velocity.y = -2f;
@@ -64,7 +101,7 @@ public class PlayerCharacterController : NetworkBehaviour
             velocity.y += Time.deltaTime * gravity;
         }
     }
-    void GetInput()
+    public Vector3 GetInput()
     {
         playerInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         if(playerInput.sqrMagnitude > 1)
@@ -73,6 +110,7 @@ public class PlayerCharacterController : NetworkBehaviour
         }
 
         movementVector = transform.forward * playerInput.y + transform.right * playerInput.x;
+        return movementVector;
     }
     public bool isGrounded()
     {

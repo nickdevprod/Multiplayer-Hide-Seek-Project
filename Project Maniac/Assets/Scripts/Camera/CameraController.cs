@@ -31,6 +31,8 @@ public class CameraController : MonoBehaviour
     }
     void PlayerRotation()
     {
+        if (playerTransform == null) return;
+        
         _rotationY -= mouseVector.y;
         _rotationX += mouseVector.x;
         _rotationY = Mathf.Clamp(_rotationY, -90, 90);

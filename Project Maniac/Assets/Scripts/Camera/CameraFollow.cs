@@ -30,6 +30,8 @@ public class CameraFollow : MonoBehaviour
     }
     Vector3 GetDesiredPosition()
     {
+        if (!characterController) return Vector3.zero; //to avoid r nul
+        
         _playerVelocity = characterController.velocity;
         
         springForceMultiplier = _playerVelocity.y > 0 ? 0 : _startSpringForceMultiplier;

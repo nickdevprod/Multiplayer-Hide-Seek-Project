@@ -28,6 +28,6 @@ public class FallState : baseState
     }
     public override void Exit()
     {
-        ctx.currentSpeed *= ctx.walkSpeed;
+        
     }
 }
