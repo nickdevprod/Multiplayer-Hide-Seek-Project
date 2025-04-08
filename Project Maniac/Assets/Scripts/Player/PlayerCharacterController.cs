@@ -50,15 +50,6 @@ public class PlayerCharacterController : NetworkBehaviour
     {
         if (!IsOwner) return;
         
-        if (IsServer)
-        {
-            MovePlayer(GetInput());
-            
-        }else if (IsClient)
-        {
-            MovePlayerRpc(GetInput());
-        }
-        
         MovementStateMachine.Update();
         
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded())
@@ -75,13 +66,9 @@ public class PlayerCharacterController : NetworkBehaviour
         
     }
     [Rpc(SendTo.Server)]
-    public void MovePlayerRpc(Vector3 movementVector)
+    public void MovePlayerRpc(Vector3 movementVector)//this vector already takes speed, deltatime and velocity into consideration
     {
-        characterController.Move((movementVector * currentSpeed + velocity)  * Time.deltaTime);
-    }
-    void MovePlayer(Vector3 movementVector)
-    {
-        characterController.Move((movementVector * currentSpeed + velocity)  * Time.deltaTime);
+        characterController.Move(movementVector + velocity * Time.deltaTime);
     }
 
     [Rpc(SendTo.Server)]
@@ -101,7 +88,7 @@ public class PlayerCharacterController : NetworkBehaviour
             velocity.y += Time.deltaTime * gravity;
         }
     }
-    public Vector3 GetInput()
+    public Vector3 GetMovementVector()
     {
         playerInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         if(playerInput.sqrMagnitude > 1)
@@ -110,7 +97,7 @@ public class PlayerCharacterController : NetworkBehaviour
         }
 
         movementVector = transform.forward * playerInput.y + transform.right * playerInput.x;
-        return movementVector;
+        return (movementVector * currentSpeed) * Time.deltaTime;
     }
     public bool isGrounded()
     {

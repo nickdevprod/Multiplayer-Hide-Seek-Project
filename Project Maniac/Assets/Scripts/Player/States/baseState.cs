@@ -18,6 +18,7 @@ public class baseState : State
     public override void Update()
     {
         //Debug.Log("Current state is: " + this.GetType() + "Object name is: " + ctx.gameObject.name);
+        ctx.MovePlayerRpc(ctx.GetMovementVector());
         ctx.HandleGravityRpc();
     }
     public override void Exit()

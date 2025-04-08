@@ -215,7 +215,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 742e6293bdee34d438247223bcc102db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  headBob: 0
+  headBob: 1
   globalMagnitude: 0.9
   verticalMagnitude: 0.4
   horizontalMagnitude: 0.2

@@ -11,7 +11,6 @@ public class JumpState : baseState
         base.Enter();
         ctx.currentSpeed *= ctx.airControl;
         ctx.velocity.y = Mathf.Sqrt(ctx.jumpForce * -3.0f * ctx.gravity);
-        Debug.Log(ctx.velocity.y);
     }
     public override void Update()
     { 

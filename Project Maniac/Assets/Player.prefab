@@ -214,7 +214,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   walkSpeed: 10
   runSpeed: 15
-  jumpForce: 1.5
+  jumpForce: 1
   gravity: -19.6
   airControl: 1
   groundedCheckRadius: 0.4
@@ -276,7 +276,7 @@ MonoBehaviour:
   UseHalfFloatPrecision: 0
   InLocalSpace: 0
   SwitchTransformSpaceWhenParented: 0
-  Interpolate: 1
+  Interpolate: 0
   SlerpPosition: 0
 --- !u!1 &4315557190747332116
 GameObject:
