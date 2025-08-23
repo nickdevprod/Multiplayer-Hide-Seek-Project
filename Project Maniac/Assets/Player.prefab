@@ -62,6 +62,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -83,6 +85,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -212,21 +215,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  walkSpeed: 10
-  runSpeed: 15
-  jumpForce: 1
-  gravity: -19.6
-  airControl: 1
-  groundedCheckRadius: 0.4
-  footpos: {fileID: 4343601439012054184}
-  groundLayer:
+  _walkSpeed: 6
+  _runSpeed: 12
+  _jumpForce: 1.2
+  _gravity: -19.62
+  _airControl: 0.9
+  _footPos: {fileID: 4343601439012054184}
+  _groundedCheckRadius: 0.2
+  _groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  characterController: {fileID: 0}
-  currentSpeed: 0
-  playerInput: {x: 0, y: 0}
-  movementVector: {x: 0, y: 0, z: 0}
-  velocity: {x: 0, y: 0, z: 0}
 --- !u!114 &7894530106683434037
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -256,7 +254,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   NetworkTransformExpanded: 0
-  AuthorityMode: 0
+  AuthorityMode: 1
   TickSyncChildren: 0
   UseUnreliableDeltas: 0
   SyncPositionX: 1
@@ -276,8 +274,8 @@ MonoBehaviour:
   UseHalfFloatPrecision: 0
   InLocalSpace: 0
   SwitchTransformSpaceWhenParented: 0
-  Interpolate: 0
-  SlerpPosition: 0
+  Interpolate: 1
+  SlerpPosition: 1
 --- !u!1 &4315557190747332116
 GameObject:
   m_ObjectHideFlags: 0

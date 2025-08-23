@@ -1,111 +1,79 @@
-using System;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.Serialization;
 
+[RequireComponent(typeof(CharacterController))]
 public class PlayerCharacterController : NetworkBehaviour
 {
-    [Header("Movement")] 
-    [SerializeField] public float walkSpeed = 10;
-    [SerializeField] public float runSpeed;
-    [SerializeField] public float jumpForce;
-    [SerializeField] public float gravity;
-    [SerializeField] public float airControl = 0.5f;
-    [Header("Other")]
-    [SerializeField] float groundedCheckRadius;
-    [SerializeField] Transform footpos;
-    [SerializeField] LayerMask groundLayer;
+    [Header("Movement")]
+    [SerializeField] private float _walkSpeed = 5f;
+    [SerializeField] private float _runSpeed = 10f;
+    [SerializeField] private float _jumpForce = 5f;
+    [SerializeField] private float _gravity = -9.81f;
+    [SerializeField] private float _airControl = 0.5f;
 
+    [Header("Ground Check")]
+    [SerializeField] private Transform _footPos;
+    [SerializeField] private float _groundedCheckRadius = 0.2f;
+    [SerializeField] private LayerMask _groundLayer;
 
-    [HideInInspector] public CharacterController characterController;
-    
-    [HideInInspector] public float currentSpeed;
-    [HideInInspector] public Vector2 playerInput;
-    [HideInInspector] public Vector3 movementVector;
-    [HideInInspector] public Vector3 velocity;
-
-    public PlayerMovementStateMachine MovementStateMachine;
+    private CharacterController _characterController;
+    private Vector3 _velocity;
+    private Vector2 _input;
+    private float _currentSpeed;
+    private bool _isGrounded;
 
     private void Awake()
     {
-        characterController = GetComponent<CharacterController>();
-        MovementStateMachine = new PlayerMovementStateMachine(this);
-    }
-    private void Start()
-    {
-        MovementStateMachine.currentState = MovementStateMachine.IdleState;
-        currentSpeed = walkSpeed;
+        _characterController = GetComponent<CharacterController>();
+        _currentSpeed = _walkSpeed;
     }
 
-    public override void OnNetworkSpawn()
+    private void Update()
     {
-        gameObject.name = "player" + NetworkObjectId;
-        if (IsOwner)
-        {
-            GetComponentInChildren<MeshRenderer>().enabled = false;   
-        }
-    }
-
-    void Update()
-    {
-        if (!IsOwner) return;
+        if(!IsOwner) return;
         
-        MovementStateMachine.Update();
-        
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded())
-        {
-            if (IsOwner)
-            {
-                JumpPlayerRpc();
-            }
-        }
-        if (!isGrounded() && MovementStateMachine.currentState != MovementStateMachine.FallState)
-        {
-            MovementStateMachine.ChangeSate(MovementStateMachine.FallState);
-        }
-        
-    }
-    [Rpc(SendTo.Server)]
-    public void MovePlayerRpc(Vector3 movementVector)//this vector already takes speed, deltatime and velocity into consideration
-    {
-        characterController.Move(movementVector + velocity * Time.deltaTime);
+        GroundCheck();
+        HandleInput();
+        HandleMovementAndGravity();
     }
 
-    [Rpc(SendTo.Server)]
-    void JumpPlayerRpc()
+    private void GroundCheck()
     {
-        MovementStateMachine.ChangeSate(MovementStateMachine.JumpState);
-    }
-    
-    [Rpc(SendTo.Server)]
-    public void HandleGravityRpc()
-    {
-        if (isGrounded() && velocity.y < 0){
-            velocity.y = -2f;
-        }
-        else
-        {
-            velocity.y += Time.deltaTime * gravity;
-        }
-    }
-    public Vector3 GetMovementVector()
-    {
-        playerInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        if(playerInput.sqrMagnitude > 1)
-        {
-            playerInput.Normalize();
-        }
+        _isGrounded = Physics.CheckSphere(_footPos.position, _groundedCheckRadius, _groundLayer);
 
-        movementVector = transform.forward * playerInput.y + transform.right * playerInput.x;
-        return (movementVector * currentSpeed) * Time.deltaTime;
+        if (_isGrounded && _velocity.y < 0)
+            _velocity.y = -2f; 
     }
-    public bool isGrounded()
+
+    private void HandleInput()
     {
-        return Physics.CheckSphere(footpos.position, groundedCheckRadius, groundLayer);
+        _input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        if (_input.sqrMagnitude > 1f)
+            _input.Normalize();
+
+        _currentSpeed = Input.GetKey(KeyCode.LeftShift) ? _runSpeed : _walkSpeed;
+
+        if (Input.GetKeyDown(KeyCode.Space) && _isGrounded)
+            _velocity.y = Mathf.Sqrt(_jumpForce * -2f * _gravity);
+    }
+
+    private void HandleMovementAndGravity()
+    {
+        Vector3 move = transform.right * _input.x + transform.forward * _input.y;
+
+        float control = _isGrounded ? 1f : _airControl;
+        Vector3 horizontalMovement = move * _currentSpeed * control;
+
+
+        _velocity.y += _gravity * Time.deltaTime;
+        
+        Vector3 finalMovement = horizontalMovement + _velocity;
+        _characterController.Move(finalMovement * Time.deltaTime);
     }
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.DrawWireSphere(footpos.position, groundedCheckRadius);
+        if (_footPos != null)
+            Gizmos.DrawWireSphere(_footPos.position, _groundedCheckRadius);
     }
 }
