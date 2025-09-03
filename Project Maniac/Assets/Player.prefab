@@ -142,7 +142,8 @@ MonoBehaviour:
   _jumpForce: 1.2
   _gravity: -19.62
   _airControl: 0.9
-  _ThirdPersonvisual: {fileID: 5081431858615381021}
+  _ThirdPersonvisual: {fileID: 3323245435840515041}
+  _camera: {fileID: 1622707434879839138}
 --- !u!1 &4315557190747332116
 GameObject:
   m_ObjectHideFlags: 0
@@ -859,11 +860,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e21e1614826bf8a499e5799e357f07f8, type: 3}
---- !u!1 &5081431858615381021 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5044188394635387322, guid: e21e1614826bf8a499e5799e357f07f8, type: 3}
-  m_PrefabInstance: {fileID: 37244603232718247}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5422625411730769508 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5459867774056958915, guid: e21e1614826bf8a499e5799e357f07f8, type: 3}
@@ -877,6 +873,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5111585858738814208}
     m_Modifications:
+    - target: {fileID: 177773338187521523, guid: b3fe5d08ee8745b44877a0ee1355d991, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1829062349302898117, guid: b3fe5d08ee8745b44877a0ee1355d991, type: 3}
       propertyPath: m_Name
       value: CameraHandler
@@ -925,12 +925,16 @@ PrefabInstance:
       propertyPath: playerTransform
       value: 
       objectReference: {fileID: 5111585858738814208}
-    m_RemovedComponents:
-    - {fileID: 1623521588381654248, guid: b3fe5d08ee8745b44877a0ee1355d991, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b3fe5d08ee8745b44877a0ee1355d991, type: 3}
+--- !u!20 &1622707434879839138 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 177773338187521523, guid: b3fe5d08ee8745b44877a0ee1355d991, type: 3}
+  m_PrefabInstance: {fileID: 1509427396511938129}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8433743991059495232 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7059459767952576273, guid: b3fe5d08ee8745b44877a0ee1355d991, type: 3}

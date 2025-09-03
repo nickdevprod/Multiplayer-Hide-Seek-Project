@@ -13,6 +13,7 @@ public class PlayerCharacterController : NetworkBehaviour
     
     [Header("Visuals")]
     [SerializeField] private GameObject _ThirdPersonvisual;
+    [SerializeField] private Camera _camera;
     private int _speedAnimHash = Animator.StringToHash("Speed"); 
     
     private NetworkVariable<float> SpeedAnimParam = new NetworkVariable<float>(0,NetworkVariableReadPermission.Everyone,NetworkVariableWritePermission.Owner);
@@ -23,7 +24,14 @@ public class PlayerCharacterController : NetworkBehaviour
     private Vector2 _input;
     private float _currentSpeed;
     private bool _isGrounded;
-    
+
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkDespawn();
+        if (!IsOwner) _camera.gameObject.SetActive(false);
+    }
+
     private void Awake()
     {
         _characterController = GetComponent<CharacterController>();
