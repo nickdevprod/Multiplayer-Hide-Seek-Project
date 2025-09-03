@@ -137,7 +137,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  _walkSpeed: 6
+  _walkSpeed: 3
   _runSpeed: 12
   _jumpForce: 1.2
   _gravity: -19.62
@@ -858,11 +858,39 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5044188394635387322, guid: e21e1614826bf8a499e5799e357f07f8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8964151732675458080}
   m_SourcePrefab: {fileID: 100100000, guid: e21e1614826bf8a499e5799e357f07f8, type: 3}
+--- !u!1 &5081431858615381021 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5044188394635387322, guid: e21e1614826bf8a499e5799e357f07f8, type: 3}
+  m_PrefabInstance: {fileID: 37244603232718247}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8964151732675458080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5081431858615381021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 824e6fa9f2c0f154fa6716a9ad05aa98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ClientNetworkAnimator
+  ShowTopMostFoldoutHeaderGroup: 1
+  TransitionStateInfoList: []
+  m_Animator: {fileID: 6590687993254464345}
 --- !u!4 &5422625411730769508 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5459867774056958915, guid: e21e1614826bf8a499e5799e357f07f8, type: 3}
+  m_PrefabInstance: {fileID: 37244603232718247}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &6590687993254464345 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 6625500987285161726, guid: e21e1614826bf8a499e5799e357f07f8, type: 3}
   m_PrefabInstance: {fileID: 37244603232718247}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1509427396511938129

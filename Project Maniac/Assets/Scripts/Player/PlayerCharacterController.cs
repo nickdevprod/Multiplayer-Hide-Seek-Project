@@ -29,9 +29,10 @@ public class PlayerCharacterController : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkDespawn();
+        
         if (!IsOwner) _camera.gameObject.SetActive(false);
+        transform.name = $"Player: {OwnerClientId}";
     }
-
     private void Awake()
     {
         _characterController = GetComponent<CharacterController>();
@@ -86,17 +87,10 @@ public class PlayerCharacterController : NetworkBehaviour
     {
         if (IsOwner)
         {
-            float moveMagnitude = _input.magnitude * _currentSpeed; 
-            float normalizedSpeed = moveMagnitude / _runSpeed;    
-
+            float moveMagnitude = _input.magnitude * _currentSpeed;
+            float normalizedSpeed = moveMagnitude / _runSpeed;
 
             _animator.SetFloat(_speedAnimHash, normalizedSpeed);
-            SpeedAnimParam.Value = normalizedSpeed;
         }
-        else
-        {
-            _animator.SetFloat(_speedAnimHash, SpeedAnimParam.Value);
-        }
-        
     }
 }
