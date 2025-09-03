@@ -10,41 +10,45 @@ public class PlayerCharacterController : NetworkBehaviour
     [SerializeField] private float _jumpForce = 5f;
     [SerializeField] private float _gravity = -9.81f;
     [SerializeField] private float _airControl = 0.5f;
-
-    [Header("Ground Check")]
-    [SerializeField] private Transform _footPos;
-    [SerializeField] private float _groundedCheckRadius = 0.2f;
-    [SerializeField] private LayerMask _groundLayer;
+    
+    [Header("Visuals")]
+    [SerializeField] private GameObject _ThirdPersonvisual;
+    private int _speedAnimHash = Animator.StringToHash("Speed"); 
+    
+    private NetworkVariable<float> SpeedAnimParam = new NetworkVariable<float>(0,NetworkVariableReadPermission.Everyone,NetworkVariableWritePermission.Owner);
 
     private CharacterController _characterController;
+    private Animator _animator;
     private Vector3 _velocity;
     private Vector2 _input;
     private float _currentSpeed;
     private bool _isGrounded;
-
+    
     private void Awake()
     {
         _characterController = GetComponent<CharacterController>();
+        _animator = GetComponentInChildren<Animator>();
         _currentSpeed = _walkSpeed;
     }
 
     private void Update()
     {
-        if(!IsOwner) return;
-        
-        GroundCheck();
-        HandleInput();
-        HandleMovementAndGravity();
+        if (IsOwner)
+        {
+            GroundCheck();
+            HandleInput();
+            HandleMovementAndGravity();
+        };
+        HandleAnimations();
     }
 
     private void GroundCheck()
     {
-        _isGrounded = Physics.CheckSphere(_footPos.position, _groundedCheckRadius, _groundLayer);
+        _isGrounded = _characterController.isGrounded;
 
         if (_isGrounded && _velocity.y < 0)
             _velocity.y = -2f; 
     }
-
     private void HandleInput()
     {
         _input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
@@ -56,7 +60,6 @@ public class PlayerCharacterController : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && _isGrounded)
             _velocity.y = Mathf.Sqrt(_jumpForce * -2f * _gravity);
     }
-
     private void HandleMovementAndGravity()
     {
         Vector3 move = transform.right * _input.x + transform.forward * _input.y;
@@ -71,9 +74,21 @@ public class PlayerCharacterController : NetworkBehaviour
         _characterController.Move(finalMovement * Time.deltaTime);
     }
 
-    private void OnDrawGizmosSelected()
+    private void HandleAnimations()
     {
-        if (_footPos != null)
-            Gizmos.DrawWireSphere(_footPos.position, _groundedCheckRadius);
+        if (IsOwner)
+        {
+            float moveMagnitude = _input.magnitude * _currentSpeed; 
+            float normalizedSpeed = moveMagnitude / _runSpeed;    
+
+
+            _animator.SetFloat(_speedAnimHash, normalizedSpeed);
+            SpeedAnimParam.Value = normalizedSpeed;
+        }
+        else
+        {
+            _animator.SetFloat(_speedAnimHash, SpeedAnimParam.Value);
+        }
+        
     }
 }
