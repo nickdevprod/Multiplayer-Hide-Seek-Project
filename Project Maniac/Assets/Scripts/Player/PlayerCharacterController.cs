@@ -32,6 +32,15 @@ public class PlayerCharacterController : NetworkBehaviour
         
         if (!IsOwner) _camera.gameObject.SetActive(false);
         transform.name = $"Player: {OwnerClientId}";
+        
+        NetworkManager.NetworkTickSystem.Tick += Ticker;
+    }
+
+    private int tick = 0;
+    private void Ticker()
+    {
+        tick++;
+        Debug.Log(tick);
     }
     private void Awake()
     {
@@ -93,4 +102,5 @@ public class PlayerCharacterController : NetworkBehaviour
             _animator.SetFloat(_speedAnimHash, normalizedSpeed);
         }
     }
+    
 }
