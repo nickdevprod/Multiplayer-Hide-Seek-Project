@@ -1,25 +1,26 @@
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerCharacterController : NetworkBehaviour
 {
     [Header("Movement")]
-    [SerializeField] private float _walkSpeed = 5f;
-    [SerializeField] private float _runSpeed = 10f;
-    [SerializeField] private float _jumpForce = 5f;
-    [SerializeField] private float _gravity = -9.81f;
-    [SerializeField] private float _airControl = 0.5f;
+    [SerializeField] private float walkSpeed = 5f;
+    [SerializeField] private float runSpeed = 10f;
+    [SerializeField] private float jumpForce = 5f;
+    [SerializeField] private float gravity = -9.81f;
+    [SerializeField] private float airControl = 0.5f;
     
     [Header("Visuals")]
-    [SerializeField] private GameObject _ThirdPersonvisual;
+    [SerializeField] private GameObject rotationObject;
+    [SerializeField] private GameObject playerVisual;
     [SerializeField] private Camera _camera;
-    private int _speedAnimHash = Animator.StringToHash("Speed"); 
     
-    private NetworkVariable<float> SpeedAnimParam = new NetworkVariable<float>(0,NetworkVariableReadPermission.Everyone,NetworkVariableWritePermission.Owner);
-
     private CharacterController _characterController;
     private Animator _animator;
+    private int _speedAnimHash = Animator.StringToHash("Speed"); 
+    
     private Vector3 _velocity;
     private Vector2 _input;
     private float _currentSpeed;
@@ -30,25 +31,19 @@ public class PlayerCharacterController : NetworkBehaviour
     {
         base.OnNetworkDespawn();
         
-        if (!IsOwner) _camera.gameObject.SetActive(false);
+        if (!IsOwner)
+        {
+            _camera.gameObject.SetActive(false);
+            SetLayerRecursively(playerVisual, LayerMask.NameToLayer("ThirdPerson"));
+        };
         transform.name = $"Player: {OwnerClientId}";
-        
-        NetworkManager.NetworkTickSystem.Tick += Ticker;
-    }
-
-    private int tick = 0;
-    private void Ticker()
-    {
-        tick++;
-        Debug.Log(tick);
     }
     private void Awake()
     {
         _characterController = GetComponent<CharacterController>();
         _animator = GetComponentInChildren<Animator>();
-        _currentSpeed = _walkSpeed;
+        _currentSpeed = walkSpeed;
     }
-
     private void Update()
     {
         if (IsOwner)
@@ -73,22 +68,29 @@ public class PlayerCharacterController : NetworkBehaviour
         if (_input.sqrMagnitude > 1f)
             _input.Normalize();
 
-        _currentSpeed = Input.GetKey(KeyCode.LeftShift) ? _runSpeed : _walkSpeed;
+        _currentSpeed = Input.GetKey(KeyCode.LeftShift) ? runSpeed : walkSpeed;
 
         if (Input.GetKeyDown(KeyCode.Space) && _isGrounded)
-            _velocity.y = Mathf.Sqrt(_jumpForce * -2f * _gravity);
+            _velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
     }
     private void HandleMovementAndGravity()
     {
-        Vector3 move = transform.right * _input.x + transform.forward * _input.y;
+        SendMovementServerRPC(_input, _isGrounded, _currentSpeed);
+    }
 
-        float control = _isGrounded ? 1f : _airControl;
-        Vector3 horizontalMovement = move * _currentSpeed * control;
+    [ServerRpc]
+    private void SendMovementServerRPC(Vector2 input, bool isGrounded, float speed)
+    {
+        Vector3 move = transform.right * input.x + transform.forward * input.y;
+
+        float control = isGrounded ? 1f : airControl;
+        Vector3 horizontalMovement = move * speed * control;
 
 
-        _velocity.y += _gravity * Time.deltaTime;
+        _velocity.y += gravity * Time.deltaTime;
         
         Vector3 finalMovement = horizontalMovement + _velocity;
+
         _characterController.Move(finalMovement * Time.deltaTime);
     }
 
@@ -97,9 +99,20 @@ public class PlayerCharacterController : NetworkBehaviour
         if (IsOwner)
         {
             float moveMagnitude = _input.magnitude * _currentSpeed;
-            float normalizedSpeed = moveMagnitude / _runSpeed;
+            float normalizedSpeed = moveMagnitude / runSpeed;
 
             _animator.SetFloat(_speedAnimHash, normalizedSpeed);
+        }
+    }
+    public static void SetLayerRecursively(GameObject obj, int newLayer)
+    {
+        if (obj == null) return;
+
+        obj.layer = newLayer;
+
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursively(child.gameObject, newLayer);
         }
     }
     

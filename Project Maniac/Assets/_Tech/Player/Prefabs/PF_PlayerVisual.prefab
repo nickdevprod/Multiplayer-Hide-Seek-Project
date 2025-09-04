@@ -1192,7 +1192,7 @@ GameObject:
   - component: {fileID: 5459867774056958915}
   - component: {fileID: 6625500987285161726}
   m_Layer: 0
-  m_Name: PF_CharacterVisual
+  m_Name: PF_PlayerVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
