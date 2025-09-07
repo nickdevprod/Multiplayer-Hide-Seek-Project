@@ -88,6 +88,14 @@ public class PlayerCharacterController : NetworkBehaviour
                 playerSkinnedMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
         }
     }
+    public override void OnNetworkDespawn()
+    {
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.NetworkTickSystem != null)
+        {
+            NetworkManager.Singleton.NetworkTickSystem.Tick -= Tick;
+        }
+        base.OnNetworkDespawn();
+    }
     
     private void Awake()
     {
@@ -101,14 +109,6 @@ public class PlayerCharacterController : NetworkBehaviour
         serverInputQueue = new Queue<InputPayLoad>();
     }
     
-    public override void OnNetworkDespawn()
-    {
-        if (NetworkManager.Singleton != null && NetworkManager.Singleton.NetworkTickSystem != null)
-        {
-            NetworkManager.Singleton.NetworkTickSystem.Tick -= Tick;
-        }
-        base.OnNetworkDespawn();
-    }
     
     private void Start()
     {
@@ -133,7 +133,7 @@ public class PlayerCharacterController : NetworkBehaviour
     {
         input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         sprint = Input.GetKey(KeyCode.LeftShift);
-        jump = Input.GetKeyDown(KeyCode.Space);  // Changed to GetKeyDown for proper jump detection
+        jump = Input.GetKey(KeyCode.Space);  // Changed to GetKeyDown for proper jump detection
     }
 
     private void Tick()
@@ -241,7 +241,7 @@ public class PlayerCharacterController : NetworkBehaviour
     
     private StatePayload ProcessMovement(InputPayLoad input)
     {
-        Move(input.inputVector, input.sprint, input.jump);
+        Move(input.inputVector.normalized, input.sprint, input.jump);
 
         return new StatePayload()
         {

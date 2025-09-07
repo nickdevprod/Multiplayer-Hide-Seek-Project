@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e298cb3c0ac4a54b952e1d7ffaf6ad3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
-  lerpSpeed: 10
+  lerpSpeed: 20
   smoothTime: 0.1
   springForceMultiplier: 0.1
   enableSpring: 0
