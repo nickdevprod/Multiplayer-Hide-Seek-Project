@@ -5,7 +5,6 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-
 #region Data
 public struct InputPayLoad : INetworkSerializable
 {
@@ -25,8 +24,9 @@ public struct InputPayLoad : INetworkSerializable
 public struct StatePayload : INetworkSerializable
 {
     public int tick;
-    public Vector2 position;
+    public Vector3 position;  
     public Vector3 velocity;
+    
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref tick);
@@ -49,7 +49,6 @@ public class PlayerCharacterController : NetworkBehaviour
     [Header("Visuals")]
     [SerializeField] private GameObject rotationObject;
     [SerializeField] private SkinnedMeshRenderer playerSkinnedMeshRenderer;
-    [SerializeField] private Camera _camera;
     
     private CharacterController _characterController;
     private Animator _animator;
@@ -60,8 +59,9 @@ public class PlayerCharacterController : NetworkBehaviour
     
     private Vector2 input;
     private bool sprint, jump;
-    //Netcode Client Specific
-    [SerializeField] private float reconciliationThreshold = 10;
+    
+    // Netcode Client Specific
+    [SerializeField] private float reconciliationThreshold = 0.1f;  
     const int BUFFER_SIZE = 1024;
     private CircularBuffer<InputPayLoad> clientInputBuffer;
     private CircularBuffer<StatePayload> clientStateBuffer;
@@ -69,28 +69,26 @@ public class PlayerCharacterController : NetworkBehaviour
     private StatePayload lastServerState;
     private StatePayload lastProcessedState;
     
-    //Netcode Server Specific
+    // Netcode Server Specific
     private CircularBuffer<StatePayload> serverStateBuffer;
-    Queue<InputPayLoad> serverInputQueue;
+    private Queue<InputPayLoad> serverInputQueue;
 
     private int tick;
-    
+    private float TimeBetweenTicks => 1f / NetworkManager.Singleton.NetworkTickSystem.TickRate;
     
     #region Initialization
     public override void OnNetworkSpawn()
     {
-        base.OnNetworkDespawn();
+        base.OnNetworkSpawn();  // Fixed: was calling OnNetworkDespawn
         transform.name = $"Player: {OwnerClientId}";
-        
         
         if (!IsOwner)
         {
-            _camera.gameObject.SetActive(false);
-            playerSkinnedMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-        };
-        
-        
+            if (playerSkinnedMeshRenderer != null)
+                playerSkinnedMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+        }
     }
+    
     private void Awake()
     {
         _characterController = GetComponent<CharacterController>();
@@ -101,30 +99,49 @@ public class PlayerCharacterController : NetworkBehaviour
         
         serverStateBuffer = new CircularBuffer<StatePayload>(BUFFER_SIZE);
         serverInputQueue = new Queue<InputPayLoad>();
-        NetworkManager.Singleton.NetworkTickSystem.Tick += Tick;
+    }
+    
+    public override void OnNetworkDespawn()
+    {
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.NetworkTickSystem != null)
+        {
+            NetworkManager.Singleton.NetworkTickSystem.Tick -= Tick;
+        }
+        base.OnNetworkDespawn();
+    }
+    
+    private void Start()
+    {
+        // Subscribe to tick system after NetworkManager is ready
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.NetworkTickSystem.Tick += Tick;
+        }
     }
     #endregion
+    
     private void Update()
     {
         if (IsOwner)
         {
             SetInput();
-        };
+        }
         HandleAnimations();
     }
+    
     private void SetInput()
     {
         input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         sprint = Input.GetKey(KeyCode.LeftShift);
-        jump = Input.GetKey(KeyCode.Space);
+        jump = Input.GetKeyDown(KeyCode.Space);  // Changed to GetKeyDown for proper jump detection
     }
 
     private void Tick()
     {
-        if(IsOwner)
+        if (IsOwner)
             HandleClientTick();
         
-        if(IsServer)
+        if (IsServer && !IsOwner)
             HandleServerTick();
         
         tick++;
@@ -142,12 +159,13 @@ public class PlayerCharacterController : NetworkBehaviour
             serverStateBuffer.Add(statePayload, bufferIndex);
         }
         
-        if(bufferIndex == -1) return;
+        if (bufferIndex == -1) return;
         SendToClientRPC(serverStateBuffer.Get(bufferIndex));
     }
+    
     private void HandleClientTick()
     {
-        if(!IsClient) return;
+        if (!IsClient) return;
         
         var bufferIndex = tick % BUFFER_SIZE;
         InputPayLoad inputPayLoad = new InputPayLoad()
@@ -164,41 +182,46 @@ public class PlayerCharacterController : NetworkBehaviour
         StatePayload statePayload = ProcessMovement(inputPayLoad);
         clientStateBuffer.Add(statePayload, bufferIndex);
 
-
         HandleReconciliation();
     }
 
     private void HandleReconciliation()
     {
-        if(!ShouldReconcile()) return;
+        if (!ShouldReconcile()) return;
 
-        float positionError;
-        int bufferIndex;
-        StatePayload rewindState = default;
+        int serverBufferIndex = lastServerState.tick % BUFFER_SIZE;
         
-        bufferIndex = lastServerState.tick % BUFFER_SIZE;
-        if(bufferIndex - 1 < 0) return;
-        
-        rewindState  = IsHost ? serverStateBuffer.Get(bufferIndex - 1) :lastServerState;
-        positionError = Vector3.Distance(rewindState.position, transform.position);
+        // Get the client state at the same tick as server
+        StatePayload clientStateAtServerTick = clientStateBuffer.Get(serverBufferIndex);
+        float positionError = Vector3.Distance(lastServerState.position, clientStateAtServerTick.position);
 
         if (positionError > reconciliationThreshold)
         {
-            transform.position = rewindState.position;
-            velocity = rewindState.velocity;
+            // Reconcile: set position and velocity to server values
+            transform.position = lastServerState.position;
+            velocity = lastServerState.velocity;
             
-            if(!rewindState.Equals(lastServerState)) return;
-            clientStateBuffer.Add(rewindState, rewindState.tick);
-            int tickToReplay = lastServerState.tick;
-
-            while (tickToReplay < tick)
+            // Update client state buffer with corrected server state
+            clientStateBuffer.Add(lastServerState, serverBufferIndex);
+            
+            // Replay all inputs after the server state
+            int tickToReplay = lastServerState.tick + 1;
+            int currentClientTick = tick - 1; // Current client tick before increment
+            
+            while (tickToReplay <= currentClientTick)
             {
-                int _bufferIndex = tickToReplay % BUFFER_SIZE; 
-                StatePayload statePayload = ProcessMovement(clientInputBuffer.Get(_bufferIndex));
-                clientStateBuffer.Add(statePayload, _bufferIndex);
+                int replayBufferIndex = tickToReplay % BUFFER_SIZE;
+                InputPayLoad inputToReplay = clientInputBuffer.Get(replayBufferIndex);
+                
+                // Only replay if we have valid input for this tick
+                if (inputToReplay.tick == tickToReplay)
+                {
+                    StatePayload replayedState = ProcessMovement(inputToReplay);
+                    clientStateBuffer.Add(replayedState, replayBufferIndex);
+                }
                 tickToReplay++;
             }
-        };
+        }
         
         lastProcessedState = lastServerState;
     }
@@ -206,7 +229,7 @@ public class PlayerCharacterController : NetworkBehaviour
     [ClientRpc]
     private void SendToClientRPC(StatePayload statePayload)
     {
-        if(!IsOwner) return;
+        if (!IsOwner) return;
         lastServerState = statePayload;
     }
 
@@ -215,7 +238,8 @@ public class PlayerCharacterController : NetworkBehaviour
     {
         serverInputQueue.Enqueue(inputPayLoad);
     }
-    StatePayload ProcessMovement(InputPayLoad input)
+    
+    private StatePayload ProcessMovement(InputPayLoad input)
     {
         Move(input.inputVector, input.sprint, input.jump);
 
@@ -237,39 +261,45 @@ public class PlayerCharacterController : NetworkBehaviour
         Vector3 horizontalMovement = move * _currentSpeed * control;
         
         // Gravity & jump
-        velocity.y += gravity * Time.deltaTime;
-        if (_jump && grounded)
-            velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
         if (grounded && velocity.y < 0)
             velocity.y = -2f; 
+            
+        velocity.y += gravity * TimeBetweenTicks;
+        
+        if (_jump && grounded)
+            velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
         
         // Apply movement
-        Vector3 finalMovement = horizontalMovement + velocity;
-        _characterController.Move(finalMovement * Time.deltaTime);
+        Vector3 finalMovement = horizontalMovement + Vector3.up * velocity.y;
+        _characterController.Move(finalMovement * TimeBetweenTicks);
     }
     
-
     private void HandleAnimations()
     {
-        if (IsOwner)
-        {
-            float moveMagnitude = input.magnitude * _currentSpeed;
-            float normalizedSpeed = moveMagnitude / runSpeed;
-
-            _animator.SetFloat(_speedAnimHash, normalizedSpeed);
-        }
+        if (_animator == null) return;
+        
+        // Use immediate input for responsive animations
+        float moveMagnitude = input.magnitude * _currentSpeed;
+        float normalizedSpeed = moveMagnitude / runSpeed;
+        
+        // Smooth animation transitions
+        float currentAnimSpeed = _animator.GetFloat(_speedAnimHash);
+        float targetAnimSpeed = normalizedSpeed;
+        float smoothedSpeed = Mathf.Lerp(currentAnimSpeed, targetAnimSpeed, Time.deltaTime * 10f);
+        
+        _animator.SetFloat(_speedAnimHash, smoothedSpeed);
     }
     private bool IsGrounded()
     {
         return _characterController.isGrounded;
     }
-
     private bool ShouldReconcile()
     {
-        bool isNewServerState = !lastServerState.Equals(default);
-        bool isLastStateUndefinedOrDefault = lastProcessedState.Equals(default) || !lastProcessedState.Equals(lastServerState);
+        bool isNewServerState = !lastServerState.Equals(default(StatePayload));
+        bool isLastStateUndefinedOrDifferent = lastProcessedState.Equals(default(StatePayload)) || 
+                                             lastProcessedState.tick != lastServerState.tick;
 
-        return isNewServerState && isLastStateUndefinedOrDefault;
+        return isNewServerState && isLastStateUndefinedOrDifferent;
     }
     public static void SetLayerRecursively(GameObject obj, int newLayer)
     {
@@ -282,5 +312,4 @@ public class PlayerCharacterController : NetworkBehaviour
             SetLayerRecursively(child.gameObject, newLayer);
         }
     }
-    
 }
