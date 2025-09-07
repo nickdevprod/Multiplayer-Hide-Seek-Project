@@ -125,15 +125,15 @@ public class PlayerCharacterController : NetworkBehaviour
         if (IsOwner)
         {
             SetInput();
+            HandleAnimations();
         }
-        HandleAnimations();
     }
     
     private void SetInput()
     {
         input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         sprint = Input.GetKey(KeyCode.LeftShift);
-        jump = Input.GetKey(KeyCode.Space);  // Changed to GetKeyDown for proper jump detection
+        jump = Input.GetKey(KeyCode.Space);
     }
 
     private void Tick()
@@ -162,7 +162,6 @@ public class PlayerCharacterController : NetworkBehaviour
         if (bufferIndex == -1) return;
         SendToClientRPC(serverStateBuffer.Get(bufferIndex));
     }
-    
     private void HandleClientTick()
     {
         if (!IsClient) return;
@@ -232,7 +231,6 @@ public class PlayerCharacterController : NetworkBehaviour
         if (!IsOwner) return;
         lastServerState = statePayload;
     }
-
     [ServerRpc]
     private void SendToServerRPC(InputPayLoad inputPayLoad)
     {
@@ -278,16 +276,10 @@ public class PlayerCharacterController : NetworkBehaviour
     {
         if (_animator == null) return;
         
-        // Use immediate input for responsive animations
         float moveMagnitude = input.magnitude * _currentSpeed;
         float normalizedSpeed = moveMagnitude / runSpeed;
         
-        // Smooth animation transitions
-        float currentAnimSpeed = _animator.GetFloat(_speedAnimHash);
-        float targetAnimSpeed = normalizedSpeed;
-        float smoothedSpeed = Mathf.Lerp(currentAnimSpeed, targetAnimSpeed, Time.deltaTime * 10f);
-        
-        _animator.SetFloat(_speedAnimHash, smoothedSpeed);
+        _animator.SetFloat(_speedAnimHash, normalizedSpeed);
     }
     private bool IsGrounded()
     {
