@@ -225,7 +225,7 @@ Transform:
   m_GameObject: {fileID: 166655655}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: 0.14765128, w: 0.98903954}
-  m_LocalPosition: {x: 14.9, y: 4.3, z: 0}
+  m_LocalPosition: {x: 14.51003, y: 4.4310904, z: -0.84716}
   m_LocalScale: {x: 6.3516374, y: 6.3516374, z: 6.3516374}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -233,7 +233,7 @@ Transform:
   - {fileID: 1504015539}
   - {fileID: 844440342}
   - {fileID: 1674777295}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 721845819}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 16.982}
 --- !u!1 &221021939
 GameObject:
@@ -244,8 +244,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 221021940}
+  - component: {fileID: 221021941}
   m_Layer: 0
-  m_Name: ---------Scene---------
+  m_Name: Gameplay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -266,6 +267,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &221021941
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 221021939}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ae1f13022a00e847a00ca3c990fa5dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HierarchyHeader
 --- !u!1 &288210342
 GameObject:
   m_ObjectHideFlags: 0
@@ -725,8 +738,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 331321357}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.38997, y: 0.13109, z: -0.84716}
   m_LocalScale: {x: 6.3516374, y: 6.3516374, z: 6.3516374}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -734,7 +747,7 @@ Transform:
   - {fileID: 1251949145}
   - {fileID: 712389036}
   - {fileID: 326985046}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 721845819}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &380046792
 GameObject:
@@ -1371,6 +1384,39 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 712389035}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &721845818
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 721845819}
+  m_Layer: 0
+  m_Name: Enviroment
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &721845819
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 721845818}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.38997, y: -0.13109, z: 0.84716}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 331321361}
+  - {fileID: 166655659}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1806,8 +1852,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1112722043}
+  - component: {fileID: 1112722044}
   m_Layer: 0
-  m_Name: ---------Lighting---------
+  m_Name: Lighting
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1828,6 +1875,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1112722044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1112722042}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ae1f13022a00e847a00ca3c990fa5dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HierarchyHeader
 --- !u!1 &1251949144
 GameObject:
   m_ObjectHideFlags: 0
@@ -2170,8 +2229,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1557292074}
+  - component: {fileID: 1557292075}
   m_Layer: 0
-  m_Name: ---------Managers---------
+  m_Name: Managers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2192,6 +2252,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1557292075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1557292073}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ae1f13022a00e847a00ca3c990fa5dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HierarchyHeader
 --- !u!1 &1603911459
 GameObject:
   m_ObjectHideFlags: 0
@@ -2524,8 +2596,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2019265772}
+  - component: {fileID: 2019265773}
   m_Layer: 0
-  m_Name: ---------Canvas/UI---------
+  m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2546,6 +2619,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2019265773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2019265771}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ae1f13022a00e847a00ca3c990fa5dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HierarchyHeader
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2559,6 +2644,5 @@ SceneRoots:
   - {fileID: 1689283938}
   - {fileID: 380046796}
   - {fileID: 221021940}
-  - {fileID: 331321361}
-  - {fileID: 166655659}
   - {fileID: 1079621155}
+  - {fileID: 721845819}
